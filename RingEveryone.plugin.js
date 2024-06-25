@@ -9,55 +9,41 @@
 
 module.exports = class RingEveryone {
     start() {
-        const addButton = () => {
-            const chatBar = document.querySelector('.chat-3bRxxu form');
-            if (!chatBar) return;
+        this.addButton();
+    }
 
-            const button = document.createElement('button');
-            button.className = 'ring-button';
-            button.style.backgroundImage = 'url(https://raw.githubusercontent.com/ceomrmatrix/ringeveryone/main/ringeveryone.png)';
-            button.style.backgroundSize = 'cover';
-            button.style.width = '24px';
-            button.style.height = '24px';
-            button.style.marginRight = '8px';
-            button.onclick = () => {
-                const channel = window.location.pathname.split('/').pop();
-                const members = Array.from(document.querySelectorAll('.member-2ZwC-9'));
-                const users = members.map(member => member.getAttribute('aria-label').replace('Close Member List Dialog', ''));
-                users.forEach(user => {
-                    fetch(`https://discord.com/api/v9/channels/${channel}/call/ring/${user}`, {
-                        method: 'POST',
-                        headers: {
-                            'Authorization': `Bot ${window.localStorage.token}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            'content': '',
-                            'tts': false
-                        })
-                    });
-                });
-            };
+    addButton() {
+        const chatBar = document.querySelector('.chat-3bRxxu form');
+        if (!chatBar) return;
 
-            chatBar.appendChild(button);
-        };
-
-        const observeChat = () => {
-            const chat = document.querySelector('.messagesWrapper-1sRNjr');
-            if (!chat) return;
-
-            const observer = new MutationObserver(mutations => {
-                mutations.forEach(mutation => {
-                    if (mutation.addedNodes.length && mutation.addedNodes[0].classList.contains('channelTextArea-1HTP3F')) {
-                        addButton();
-                    }
+        const button = document.createElement('button');
+        button.className = 'ring-button';
+        button.style.backgroundImage = 'url(https://raw.githubusercontent.com/ceomrmatrix/ringeveryone/main/ringeveryone.png)';
+        button.style.backgroundSize = 'cover';
+        button.style.width = '24px';
+        button.style.height = '24px';
+        button.style.marginRight = '8px';
+        button.onclick = () => {
+            const channel = window.location.pathname.split('/').pop();
+            const members = Array.from(document.querySelectorAll('.member-2ZwC-9'));
+            const users = members.map(member => member.getAttribute('aria-label').replace('Close Member List Dialog', ''));
+            users.forEach(user => {
+                fetch(`https://discord.com/api/v9/channels/${channel}/call/ring/${user}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bot ${window.localStorage.token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        'content': '',
+                        'tts': false
+                    })
                 });
             });
-
-            observer.observe(chat, { childList: true, subtree: true });
         };
 
-        observeChat();
+        chatBar.appendChild(button);
     }
+
     stop() {}
 };
