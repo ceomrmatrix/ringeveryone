@@ -1,7 +1,7 @@
 /**
  * @name Ring Everyone
  * @version 1.0
- * @description Adds a button to ring everyone in a group chat in BetterDiscord
+ * @description ring everyone in the gc you are in with just a button
  * @author ceomrmatrix
  * @source https://github.com/ceomrmatrix/ringeveryone/blob/main/RingEveryone.plugin.js
  * @updateUrl https://github.com/ceomrmatrix/ringeveryone/raw/main/RingEveryone.plugin.js
@@ -15,7 +15,11 @@ module.exports = class RingEveryone {
 
             const button = document.createElement('button');
             button.className = 'ring-button';
-            button.textContent = 'Ring Everyone';
+            button.style.backgroundImage = 'url(https://raw.githubusercontent.com/ceomrmatrix/ringeveryone/main/ringeveryone.png)';
+            button.style.backgroundSize = 'cover';
+            button.style.width = '24px';
+            button.style.height = '24px';
+            button.style.marginRight = '8px';
             button.onclick = () => {
                 const channel = window.location.pathname.split('/').pop();
                 const members = Array.from(document.querySelectorAll('.member-2ZwC-9'));
