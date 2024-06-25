@@ -10,9 +10,9 @@
 module.exports = class RingEveryone {
     start() {
         const addButton = () => {
-            const chatBar = document.querySelector('.channelTextArea-1HTP3F');
+            const chatBar = document.querySelector('.chat-3bRxxu form');
             if (!chatBar) return;
-    
+
             const button = document.createElement('button');
             button.className = 'ring-button';
             button.textContent = 'Ring Everyone';
@@ -34,14 +34,14 @@ module.exports = class RingEveryone {
                     });
                 });
             };
-    
+
             chatBar.appendChild(button);
         };
-    
+
         const observeChat = () => {
             const chat = document.querySelector('.messagesWrapper-1sRNjr');
             if (!chat) return;
-    
+
             const observer = new MutationObserver(mutations => {
                 mutations.forEach(mutation => {
                     if (mutation.addedNodes.length && mutation.addedNodes[0].classList.contains('channelTextArea-1HTP3F')) {
@@ -49,10 +49,10 @@ module.exports = class RingEveryone {
                     }
                 });
             });
-    
+
             observer.observe(chat, { childList: true, subtree: true });
         };
-    
+
         observeChat();
     }
     stop() {}
