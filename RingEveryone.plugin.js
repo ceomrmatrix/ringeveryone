@@ -1,11 +1,13 @@
 /**
  * @name Ring Everyone
- * @version 1.0
- * @description Ring everyone in the group chat with just a button
+ * @version 1.1
+ * @description ring everyone in the group chat with just a button
  * @author ceomrmatrix
  * @source https://github.com/ceomrmatrix/ringeveryone/blob/main/RingEveryone.plugin.js
  * @updateUrl https://github.com/ceomrmatrix/ringeveryone/raw/main/RingEveryone.plugin.js
  */
+
+const { Webpack, React } = BdApi;
 
 module.exports = class RingEveryone {
     start() {
@@ -13,52 +15,67 @@ module.exports = class RingEveryone {
     }
 
     addButton() {
-        const observer = new MutationObserver((mutations, obs) => {
-            const chatBar = document.querySelector('[class*="buttons-"]'); // Updated selector
-            if (chatBar) {
-                console.log('Chat bar found, adding button...');
-                const button = document.createElement('button');
-                button.className = 'ring-button';
-                button.textContent = 'Ring Everyone';
-                button.style.marginLeft = '10px'; // Adjust spacing as needed
-                button.onclick = () => {
-                    const channel = window.location.pathname.split('/').pop();
-                    const members = Array.from(document.querySelectorAll('[class*="member-"]'));
-                    const users = members.map(member => member.getAttribute('aria-label').replace('Close Member List Dialog', ''));
-                    console.log('Ringing users:', users);
-                    users.forEach(user => {
-                        fetch(`https://discord.com/api/v9/channels/${channel}/call/ring/${user}`, {
-                            method: 'POST',
-                            headers: {
-                                'Authorization': `Bot ${window.localStorage.token.slice(1, -1)}`, // Corrected token retrieval
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({
-                                'content': '',
-                                'tts': false
-                            })
-                        }).then(response => {
-                            if (!response.ok) {
-                                console.error('Failed to ring user:', user, response.statusText);
-                            }
-                        }).catch(error => {
-                            console.error('Error ringing user:', user, error);
-                        });
-                    });
-                };
+        const ChatBarComponent = Webpack.getModule(m => m.type?.displayName === "ChannelTextAreaButtons");
+        if (!ChatBarComponent) {
+            console.error("Failed to find ChatBarComponent");
+            return;
+        }
 
-                chatBar.appendChild(button);
-                obs.disconnect(); // Stop observing once the button is added
-            } else {
-                console.log('Chat bar not found.');
-            }
-        });
+        BdApi.Patcher.after("RingEveryone", ChatBarComponent, "type", (_, __, ret) => {
+            const button = React.createElement("button", {
+                className: "ring-button",
+                onClick: this.ringEveryone,
+                style: { marginLeft: '10px' }
+            }, "Ring Everyone");
 
-        observer.observe(document, {
-            childList: true,
-            subtree: true
+            ret.props.children.push(button);
         });
     }
 
-    stop() { }
+    ringEveryone = () => {
+        const channelId = this.getCurrentChannelId();
+        if (!channelId) {
+            console.error("Failed to get current channel ID");
+            return;
+        }
+
+        const callMembers = this.getCallMembers(channelId);
+        if (callMembers.length === 0) {
+            console.log("No members in call to ring");
+            return;
+        }
+
+        console.log('Ringing users:', callMembers);
+
+        callMembers.forEach(userId => {
+            this.ringUser(channelId, userId);
+        });
+    }
+
+    getCurrentChannelId() {
+        const channelModule = Webpack.getModule(m => m.getChannelId && m.getVoiceChannelId);
+        return channelModule?.getChannelId();
+    }
+
+    getCallMembers(channelId) {
+        const voiceModule = Webpack.getModule(m => m.getVoiceStates);
+        const voiceStates = voiceModule?.getVoiceStates(channelId);
+        return Object.keys(voiceStates || {});
+    }
+
+    ringUser(channelId, userId) {
+        const ringModule = Webpack.getModule(m => m.ring);
+        if (!ringModule) {
+            console.error("Failed to find ring module");
+            return;
+        }
+
+        ringModule.ring(channelId, userId).catch(error => {
+            console.error(`Failed to ring user ${userId}:`, error);
+        });
+    }
+
+    stop() {
+        BdApi.Patcher.unpatchAll("RingEveryone");
+    }
 };
