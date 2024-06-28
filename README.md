@@ -11,3 +11,9 @@ there is a downfall with this plugin, though. whatever group chat you are in and
 Current Known Bugs🐛:
 
 ❌ fails to find the button container. (fixing)
+❌ button appears but doesn't work. (fixing, but also a pain in the ass)
+❌ discord crashes whenever plugin loads for the first time. (fixing, almost done)
+
+Fixed Bugs✔️:
+
+none yet. :(
