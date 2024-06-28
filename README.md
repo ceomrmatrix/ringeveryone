@@ -14,7 +14,7 @@ Current Known Bugs🐛:
 
 ❌ button appears, but doesn't work. (fixing, but also a pain in the ass)
 
-❌ discord crashes whenever plugin loads for the first time. (fixing, almost done)
+❌ discord crashes whenever the plugin loads for the first time. (fixing, almost done)
 
 Fixed Bugs✔️:
 
