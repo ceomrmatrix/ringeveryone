@@ -1,13 +1,11 @@
 /**
  * @name Ring Everyone
- * @version 1.2
+ * @version 1.3
  * @description ring everyone in the group chat with just a button
  * @author ceomrmatrix
  * @source https://github.com/ceomrmatrix/ringeveryone/blob/main/RingEveryone.plugin.js
  * @updateUrl https://github.com/ceomrmatrix/ringeveryone/raw/main/RingEveryone.plugin.js
  */
-
-const { Webpack, React } = BdApi;
 
 module.exports = class RingEveryone {
     start() {
@@ -24,33 +22,32 @@ module.exports = class RingEveryone {
     }
 
     addButton() {
-        const ChatBarComponent = Webpack.getModule(m => m.type?.displayName === "ChannelTextAreaButtons");
-        if (!ChatBarComponent) {
-            console.error("Failed to find ChatBarComponent");
+        const buttonContainer = document.querySelector('.expression-picker-chat-input-button.buttonContainer-');
+        if (!buttonContainer) {
+            console.error("Failed to find button container");
             return;
         }
 
-        BdApi.Patcher.after("RingEveryone", ChatBarComponent, "type", (_, __, ret) => {
-            const button = React.createElement("div", {
-                className: "ring-everyone-button",
-                onClick: this.ringEveryone,
-                style: {
-                    backgroundImage: `url(${this.settings.imageUrl})`,
-                    backgroundSize: 'cover',
-                    width: '24px',
-                    height: '24px',
-                    cursor: 'pointer',
-                    marginLeft: '8px',
-                    marginRight: '8px'
-                }
-            });
+        const button = document.createElement('div');
+        button.className = 'ring-everyone-button';
+        button.style.backgroundImage = `url(${this.settings.imageUrl})`;
+        button.style.backgroundSize = 'cover';
+        button.style.width = '24px';
+        button.style.height = '24px';
+        button.style.cursor = 'pointer';
+        button.style.marginLeft = '8px';
+        button.style.marginRight = '8px';
+        button.onclick = this.ringEveryone;
 
-            if (Array.isArray(ret.props.children)) {
-                ret.props.children.unshift(button);
-            } else {
-                ret.props.children = [button, ret.props.children];
+        buttonContainer.parentNode.insertBefore(button, buttonContainer);
+
+        // Observe for changes and re-add the button if needed
+        this.observer = new MutationObserver(() => {
+            if (!document.querySelector('.ring-everyone-button')) {
+                this.addButton();
             }
         });
+        this.observer.observe(document.body, { childList: true, subtree: true });
     }
 
     ringEveryone = () => {
@@ -74,29 +71,32 @@ module.exports = class RingEveryone {
     }
 
     getCurrentChannelId() {
-        const channelModule = Webpack.getModule(m => m.getChannelId && m.getVoiceChannelId);
-        return channelModule?.getChannelId();
+        // This method needs to be implemented based on Discord's internal structure
+        // You might need to use BdApi.Webpack to find the correct module
+        console.error("getCurrentChannelId method not implemented");
+        return null;
     }
 
     getCallMembers(channelId) {
-        const voiceModule = Webpack.getModule(m => m.getVoiceStates);
-        const voiceStates = voiceModule?.getVoiceStates(channelId);
-        return Object.keys(voiceStates || {});
+        // This method needs to be implemented based on Discord's internal structure
+        // You might need to use BdApi.Webpack to find the correct module
+        console.error("getCallMembers method not implemented");
+        return [];
     }
 
     ringUser(channelId, userId) {
-        const ringModule = Webpack.getModule(m => m.ring);
-        if (!ringModule) {
-            console.error("Failed to find ring module");
-            return;
-        }
-
-        ringModule.ring(channelId, userId).catch(error => {
-            console.error(`Failed to ring user ${userId}:`, error);
-        });
+        // This method needs to be implemented based on Discord's internal structure
+        // You might need to use BdApi.Webpack to find the correct module
+        console.error("ringUser method not implemented");
     }
 
     stop() {
-        BdApi.Patcher.unpatchAll("RingEveryone");
+        if (this.observer) {
+            this.observer.disconnect();
+        }
+        const button = document.querySelector('.ring-everyone-button');
+        if (button) {
+            button.remove();
+        }
     }
 };
