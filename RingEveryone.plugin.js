@@ -103,7 +103,7 @@ module.exports = class RingEveryone {
     }
 
     getCurrentChannelId() {
-        return "1119869145467600936";
+        return "put your channel id here!!!";
     }
 
     getCallMembers() {
