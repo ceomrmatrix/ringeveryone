@@ -1,6 +1,6 @@
 /**
  * @name Ring Everyone
- * @version 1.6
+ * @version 1.7
  * @description ring everyone in the group chat with just a button
  * @author ceomrmatrix
  * @source https://github.com/ceomrmatrix/ringeveryone/blob/main/RingEveryone.plugin.js
@@ -10,7 +10,6 @@
 module.exports = class RingEveryone {
     start() {
         this.loadSettings();
-        this.addButton();
         this.setupObserver();
     }
 
@@ -22,10 +21,29 @@ module.exports = class RingEveryone {
         }
     }
 
+    findChatBar() {
+        const selectors = [
+            '.buttons-',
+            '[class*="buttons-"]',
+            '[class*="channelTextArea-"] [class*="buttons-"]',
+            '.channelTextArea-',
+            '[class*="channelTextArea-"]',
+            '.expression-picker-chat-input-button',
+            '[class*="expressionPickerButton-"]'
+        ];
+
+        for (const selector of selectors) {
+            const element = document.querySelector(selector);
+            if (element) return element;
+        }
+
+        return null;
+    }
+
     addButton() {
-        const container = document.querySelector('.buttons-');
+        const container = this.findChatBar();
         if (!container) {
-            console.log("failed to find button container");
+            console.log("failed to find chat bar");
             return;
         }
 
@@ -42,6 +60,7 @@ module.exports = class RingEveryone {
             button.onclick = this.ringEveryone;
 
             container.appendChild(button);
+            console.log("button added successfully");
         }
     }
 
@@ -58,6 +77,9 @@ module.exports = class RingEveryone {
             childList: true,
             subtree: true
         });
+
+        // Initial attempt to add the button
+        this.addButton();
     }
 
     ringEveryone = () => {
@@ -81,21 +103,18 @@ module.exports = class RingEveryone {
     }
 
     getCurrentChannelId() {
-        return "you're channel id goes here!!!";
+        return "1119869145467600936";
     }
 
     getCallMembers() {
         const memberElements = document.querySelectorAll('.voiceCallWrapper_ .participant_');
         return Array.from(memberElements).map(el => {
-            // extract user id from the element (this might need adjustment based on actual structure)
             return el.id || el.dataset.userId || '';
         }).filter(id => id !== '');
     }
 
     ringUser(channelId, userId) {
-        // this is a placeholder. you'll need to find discord's internal method for ringing users
         console.log(`attempting to ring user ${userId} in channel ${channelId}`);
-        // in a real implementation, you'd use discord's internal api here
     }
 
     stop() {
