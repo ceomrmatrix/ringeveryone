@@ -1,6 +1,6 @@
 /**
  * @name Ring Everyone
- * @version 1.1
+ * @version 1.2
  * @description ring everyone in the group chat with just a button
  * @author ceomrmatrix
  * @source https://github.com/ceomrmatrix/ringeveryone/blob/main/RingEveryone.plugin.js
@@ -11,7 +11,16 @@ const { Webpack, React } = BdApi;
 
 module.exports = class RingEveryone {
     start() {
+        this.loadSettings();
         this.addButton();
+    }
+
+    loadSettings() {
+        this.settings = BdApi.Data.load("RingEveryone", "settings") || {};
+        if (!this.settings.imageUrl) {
+            this.settings.imageUrl = "https://raw.githubusercontent.com/ceomrmatrix/ringeveryone/main/ringeveryone.png";
+            BdApi.Data.save("RingEveryone", "settings", this.settings);
+        }
     }
 
     addButton() {
@@ -22,13 +31,25 @@ module.exports = class RingEveryone {
         }
 
         BdApi.Patcher.after("RingEveryone", ChatBarComponent, "type", (_, __, ret) => {
-            const button = React.createElement("button", {
-                className: "ring-button",
+            const button = React.createElement("div", {
+                className: "ring-everyone-button",
                 onClick: this.ringEveryone,
-                style: { marginLeft: '10px' }
-            }, "Ring Everyone");
+                style: {
+                    backgroundImage: `url(${this.settings.imageUrl})`,
+                    backgroundSize: 'cover',
+                    width: '24px',
+                    height: '24px',
+                    cursor: 'pointer',
+                    marginLeft: '8px',
+                    marginRight: '8px'
+                }
+            });
 
-            ret.props.children.push(button);
+            if (Array.isArray(ret.props.children)) {
+                ret.props.children.unshift(button);
+            } else {
+                ret.props.children = [button, ret.props.children];
+            }
         });
     }
 
