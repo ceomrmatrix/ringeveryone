@@ -1,7 +1,7 @@
 /**
  * @name Ring Everyone
  * @version 1.4
- * @description Ring everyone in the group chat with just a button
+ * @description ring everyone in the group chat with just a button
  * @author ceomrmatrix
  * @source https://github.com/ceomrmatrix/ringeveryone/blob/main/RingEveryone.plugin.js
  * @updateUrl https://github.com/ceomrmatrix/ringeveryone/raw/main/RingEveryone.plugin.js
