@@ -1,6 +1,6 @@
 /**
  * @name Ring Everyone
- * @version 1.4
+ * @version 1.6
  * @description ring everyone in the group chat with just a button
  * @author ceomrmatrix
  * @source https://github.com/ceomrmatrix/ringeveryone/blob/main/RingEveryone.plugin.js
@@ -10,7 +10,8 @@
 module.exports = class RingEveryone {
     start() {
         this.loadSettings();
-        setTimeout(() => this.addButton(), 1000); // Wait 1 second before trying to add the button
+        this.addButton();
+        this.setupObserver();
     }
 
     loadSettings() {
@@ -22,31 +23,13 @@ module.exports = class RingEveryone {
     }
 
     addButton() {
-        console.log(document.body.innerHTML); // Log the DOM structure for debugging
+        const container = document.querySelector('.buttons-');
+        if (!container) {
+            console.log("failed to find button container");
+            return;
+        }
 
-        const findButtonContainer = () => {
-            const selectors = [
-                '.expression-picker-chat-input-button',
-                '.channelTextArea-',
-                '[class*="channelTextArea-"]',
-                '[class*="buttons-"]'
-            ];
-
-            for (const selector of selectors) {
-                const element = document.querySelector(selector);
-                if (element) return element;
-            }
-
-            return null;
-        };
-
-        const insertButton = () => {
-            const container = findButtonContainer();
-            if (!container) {
-                console.error("Failed to find button container");
-                return false;
-            }
-
+        if (!document.querySelector('.ring-everyone-button')) {
             const button = document.createElement('div');
             button.className = 'ring-everyone-button';
             button.style.backgroundImage = `url(${this.settings.imageUrl})`;
@@ -58,45 +41,39 @@ module.exports = class RingEveryone {
             button.style.marginRight = '8px';
             button.onclick = this.ringEveryone;
 
-            if (container.firstChild) {
-                container.insertBefore(button, container.firstChild);
-            } else {
-                container.appendChild(button);
-            }
-
-            return true;
-        };
-
-        if (!insertButton()) {
-            const observer = new MutationObserver((mutations, obs) => {
-                if (insertButton()) {
-                    obs.disconnect();
-                }
-            });
-
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true
-            });
-
-            this.observer = observer;
+            container.appendChild(button);
         }
+    }
+
+    setupObserver() {
+        this.observer = new MutationObserver((mutations) => {
+            for (let mutation of mutations) {
+                if (mutation.type === 'childList') {
+                    this.addButton();
+                }
+            }
+        });
+
+        this.observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
     }
 
     ringEveryone = () => {
         const channelId = this.getCurrentChannelId();
         if (!channelId) {
-            console.error("Failed to get current channel ID");
+            console.log("failed to get current channel id");
             return;
         }
 
-        const callMembers = this.getCallMembers(channelId);
+        const callMembers = this.getCallMembers();
         if (callMembers.length === 0) {
-            console.log("No members in call to ring");
+            console.log("no members in call to ring");
             return;
         }
 
-        console.log('Ringing users:', callMembers);
+        console.log('ringing users:', callMembers);
 
         callMembers.forEach(userId => {
             this.ringUser(channelId, userId);
@@ -104,20 +81,21 @@ module.exports = class RingEveryone {
     }
 
     getCurrentChannelId() {
-        // This method needs to be implemented
-        console.error("getCurrentChannelId method not implemented");
-        return null;
+        return "you're channel id goes here!!!";
     }
 
-    getCallMembers(channelId) {
-        // This method needs to be implemented
-        console.error("getCallMembers method not implemented");
-        return [];
+    getCallMembers() {
+        const memberElements = document.querySelectorAll('.voiceCallWrapper_ .participant_');
+        return Array.from(memberElements).map(el => {
+            // extract user id from the element (this might need adjustment based on actual structure)
+            return el.id || el.dataset.userId || '';
+        }).filter(id => id !== '');
     }
 
     ringUser(channelId, userId) {
-        // This method needs to be implemented
-        console.error("ringUser method not implemented");
+        // this is a placeholder. you'll need to find discord's internal method for ringing users
+        console.log(`attempting to ring user ${userId} in channel ${channelId}`);
+        // in a real implementation, you'd use discord's internal api here
     }
 
     stop() {
